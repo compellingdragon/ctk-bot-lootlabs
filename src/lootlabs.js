@@ -9,23 +9,27 @@ function appendPuid(lootUrl, puid) {
 }
 
 async function createLootLabsLink({ sessionId, destinationUrl }) {
-  const body = {
-    title: config.lootlabsTitle.slice(0, 30),
+  if (!destinationUrl) {
+    throw new Error('LootLabs destinationUrl is missing');
+  }
+
+  const params = new URLSearchParams({
+    title: String(config.lootlabsTitle || 'Earn CTK!').slice(0, 30),
     url: destinationUrl,
-    tier_id: config.lootlabsTierId,
-    number_of_tasks: config.lootlabsNumberOfTasks,
-    theme: config.lootlabsTheme
-  };
+    tier_id: String(config.lootlabsTierId || 3),
+    number_of_tasks: String(config.lootlabsNumberOfTasks || 3),
+    theme: String(config.lootlabsTheme || 3)
+  });
 
-  if (config.lootlabsThumbnail) body.thumbnail = config.lootlabsThumbnail;
+  if (config.lootlabsThumbnail) {
+    params.set('thumbnail', config.lootlabsThumbnail);
+  }
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
+  const res = await fetch(`${API_URL}?${params.toString()}`, {
+    method: 'GET',
     headers: {
-      Authorization: `Bearer ${config.lootlabsApiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
+      Authorization: `Bearer ${config.lootlabsApiKey}`
+    }
   });
 
   let data;
@@ -36,8 +40,10 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
   }
 
   if (!res.ok || !data || data.type === 'error' || !data.message?.loot_url) {
-    const msg = data?.message || `LootLabs API failed with HTTP ${res.status}`;
-    throw new Error(`LootLabs link creation failed: ${msg}`);
+    const msg = typeof data?.message === 'string'
+      ? data.message
+      : JSON.stringify(data?.message || data || {});
+    throw new Error(`LootLabs link creation failed: ${msg || `HTTP ${res.status}`}`);
   }
 
   return {
