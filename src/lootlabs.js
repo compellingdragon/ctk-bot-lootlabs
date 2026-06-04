@@ -9,18 +9,32 @@ function appendPuid(lootUrl, puid) {
 }
 
 async function createLootLabsLink({ sessionId, destinationUrl }) {
-  if (!destinationUrl) {
-    throw new Error('LootLabs destinationUrl is missing');
-  }
+  const title = String(config.lootlabsTitle || 'Earn CTK!').replace(/^"|"$/g, '').slice(0, 30);
+  const finalUrl = String(destinationUrl || '').trim();
+  const tierId = String(config.lootlabsTierId || 3);
+  const tasks = String(config.lootlabsNumberOfTasks || 3);
+  const theme = String(config.lootlabsTheme || 3);
 
-  const params = new URLSearchParams({
-    api_token: String(config.lootlabsApiKey),
-    title: String(config.lootlabsTitle || 'Earn CTK!').slice(0, 30),
-    url: String(destinationUrl),
-    tier_id: String(config.lootlabsTierId || 3),
-    number_of_tasks: String(config.lootlabsNumberOfTasks || 3),
-    theme: String(config.lootlabsTheme || 3)
+  console.log('LootLabs request debug:', {
+    hasApiKey: Boolean(config.lootlabsApiKey),
+    title,
+    url: finalUrl,
+    tier_id: tierId,
+    number_of_tasks: tasks,
+    theme
   });
+
+  if (!config.lootlabsApiKey) throw new Error('Missing LOOTLABS_API_KEY');
+  if (!finalUrl) throw new Error('Missing destinationUrl for LootLabs');
+  if (!title) throw new Error('Missing LOOTLABS_TITLE');
+
+  const params = new URLSearchParams();
+  params.set('api_token', String(config.lootlabsApiKey));
+  params.set('title', title);
+  params.set('url', finalUrl);
+  params.set('tier_id', tierId);
+  params.set('number_of_tasks', tasks);
+  params.set('theme', theme);
 
   if (config.lootlabsThumbnail) {
     params.set('thumbnail', String(config.lootlabsThumbnail));
@@ -36,6 +50,12 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
   } catch {
     data = null;
   }
+
+  console.log('LootLabs response debug:', {
+    status: res.status,
+    ok: res.ok,
+    data
+  });
 
   if (!res.ok || !data || data.type === 'error' || !data.message?.loot_url) {
     const msg =
