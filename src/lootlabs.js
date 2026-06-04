@@ -1,13 +1,3 @@
-const config = require('./config');
-
-const API_URL = 'https://creators.lootlabs.gg/api/public/content_locker';
-
-function appendPuid(lootUrl, puid) {
-  const url = new URL(lootUrl);
-  url.searchParams.set('puid', puid);
-  return url.toString();
-}
-
 async function createLootLabsLink({ sessionId, destinationUrl }) {
   const title = String(config.lootlabsTitle || 'Earn CTK!').replace(/^"|"$/g, '').slice(0, 30);
   const finalUrl = String(destinationUrl || '').trim();
@@ -29,7 +19,6 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
   if (!title) throw new Error('Missing LOOTLABS_TITLE');
 
   const params = new URLSearchParams();
-  params.set('api_token', String(config.lootlabsApiKey));
   params.set('title', title);
   params.set('url', finalUrl);
   params.set('tier_id', tierId);
@@ -40,8 +29,13 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
     params.set('thumbnail', String(config.lootlabsThumbnail));
   }
 
-  const res = await fetch(`${API_URL}?${params.toString()}`, {
-    method: 'GET'
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.lootlabsApiKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params.toString()
   });
 
   let data;
@@ -72,5 +66,3 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
     apiResponse: data
   };
 }
-
-module.exports = { createLootLabsLink };
