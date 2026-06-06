@@ -1,7 +1,7 @@
 {
   "name": "ctk-bot-lootlabs",
-  "version": "2.0.0",
-  "description": "CompellingCore CTK Discord bot with LootLabs postback rewards",
+  "version": "3.0.0",
+  "description": "CompellingCore CTK Discord bot with LootLabs and Linkvertise rewards",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -12,7 +12,8 @@
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
   },
   "engines": {
     "node": "20.x"
