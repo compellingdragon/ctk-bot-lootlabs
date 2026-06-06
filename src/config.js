@@ -20,7 +20,8 @@ const config = {
   clientSecret: required('CLIENT_SECRET'),
   guildId: process.env.GUILD_ID || '1390687797190594651',
   adminRoleId: optional('ADMIN_ROLE_ID'),
-
+  linkvertiseStaticUrl: optional('LINKVERTISE_STATIC_URL'),
+  linkvertiseClaimSecret: optional('LINKVERTISE_CLAIM_SECRET', process.env.SESSION_SECRET || 'change-me'),
   publicBaseUrl: required('PUBLIC_BASE_URL').replace(/\/$/, ''),
   port: Number(process.env.PORT || 3000),
   sessionSecret: required('SESSION_SECRET'),
