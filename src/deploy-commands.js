@@ -7,7 +7,7 @@ const commands = [
     .setDescription("Earn CTK by completing ads")
     .addStringOption(option =>
       option
-        .setName("platform")
+        .setName("method")
         .setDescription("Choose ad platform")
         .setRequired(true)
         .addChoices(
