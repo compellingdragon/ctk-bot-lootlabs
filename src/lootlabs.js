@@ -3,29 +3,20 @@ const config = require('./config');
 const API_URL = 'https://creators.lootlabs.gg/api/public/content_locker';
 
 function appendPuid(url, sessionId) {
-  const parsed = new URL(url);
-  parsed.searchParams.set('puid', sessionId);
-  return parsed.toString();
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}puid=${encodeURIComponent(sessionId)}`;
 }
 
 async function createLootLabsLink({ sessionId, destinationUrl }) {
-  const title = String(config.lootlabsTitle || 'Earn CTK!')
+  const title = String(config.lootlabsTitle || 'Earn CTK')
     .replace(/^"|"$/g, '')
     .slice(0, 30);
 
   const finalUrl = String(destinationUrl || '').trim();
 
-  if (!config.lootlabsApiKey) {
-    throw new Error('Missing LOOTLABS_API_KEY');
-  }
-
-  if (!sessionId) {
-    throw new Error('Missing sessionId');
-  }
-
-  if (!finalUrl) {
-    throw new Error('Missing destinationUrl');
-  }
+  if (!config.lootlabsApiKey) throw new Error('Missing LOOTLABS_API_KEY');
+  if (!sessionId) throw new Error('Missing sessionId');
+  if (!finalUrl) throw new Error('Missing destinationUrl');
 
   const body = {
     title,
@@ -74,27 +65,27 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
     data
   });
 
-const createdLink = Array.isArray(data.message)
-  ? data.message[0]
-  : data.message;
+  const createdLink = Array.isArray(data.message)
+    ? data.message[0]
+    : data.message;
 
-if (!res.ok || !data || data.type === 'error' || !createdLink?.loot_url) {
-  const msg =
-    typeof data?.message === 'string'
-      ? data.message
-      : data?.raw || JSON.stringify(data?.message || data || {});
+  if (!res.ok || !data || data.type === 'error' || !createdLink?.loot_url) {
+    const msg =
+      typeof data?.message === 'string'
+        ? data.message
+        : data?.raw || JSON.stringify(data?.message || data || {});
 
-  throw new Error(`LootLabs link creation failed: ${msg || `HTTP ${res.status}`}`);
-}
+    throw new Error(`LootLabs link creation failed: ${msg || `HTTP ${res.status}`}`);
+  }
 
-const rawLootUrl = createdLink.loot_url;
+  const rawLootUrl = createdLink.loot_url;
 
-return {
-  shortCode: createdLink.short || null,
-  rawLootUrl,
-  lootUrl: appendPuid(rawLootUrl, sessionId),
-  apiResponse: data
-};
+  return {
+    shortCode: createdLink.short || null,
+    rawLootUrl,
+    lootUrl: appendPuid(rawLootUrl, sessionId),
+    apiResponse: data
+  };
 }
 
 module.exports = {
