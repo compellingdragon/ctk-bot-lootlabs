@@ -1,89 +1,46 @@
-const { REST, Routes, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const config = require('./config');
+const { REST, Routes, SlashCommandBuilder } = require("discord.js");
+require("dotenv").config();
 
 const commands = [
   new SlashCommandBuilder()
-    .setName('earn')
-    .setDescription('Create a private CTK earn session link.')
-    .addStringOption(opt =>
-      opt
-        .setName('method')
-        .setDescription('Choose earning method')
-        .setRequired(false)
+    .setName("earn")
+    .setDescription("Earn CTK by completing ads")
+    .addStringOption(option =>
+      option
+        .setName("platform")
+        .setDescription("Choose ad platform")
+        .setRequired(true)
         .addChoices(
-          { name: 'LootLabs - higher CTK', value: 'lootlabs' },
-          { name: 'Linkvertise - quick CTK', value: 'linkvertise' }
+          { name: "LootLabs", value: "lootlabs" },
+          { name: "Linkvertise", value: "linkvertise" }
         )
     ),
 
   new SlashCommandBuilder()
-    .setName('balance')
-    .setDescription('Check your CTK balance or another user balance.')
-    .addUserOption(opt =>
-      opt.setName('user').setDescription('Optional user to check').setRequired(false)
-    ),
+    .setName("balance")
+    .setDescription("Check your CTK balance"),
 
   new SlashCommandBuilder()
-    .setName('leaderboard')
-    .setDescription('Show the top CTK balances.'),
+    .setName("leaderboard")
+    .setDescription("View the CTK leaderboard"),
+].map(command => command.toJSON());
 
-  new SlashCommandBuilder()
-    .setName('redeem')
-    .setDescription('Request a manual server redemption using your CTK.')
-    .addIntegerOption(opt =>
-      opt.setName('amount').setDescription('CTK amount to redeem').setMinValue(1).setRequired(true)
-    )
-    .addStringOption(opt =>
-      opt.setName('item').setDescription('What you want to redeem').setRequired(true)
-    ),
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
-  new SlashCommandBuilder()
-    .setName('admin-add')
-    .setDescription('Admin: add CTK to a user.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
-    .addIntegerOption(opt => opt.setName('amount').setDescription('Amount to add').setMinValue(1).setRequired(true))
-    .addStringOption(opt => opt.setName('reason').setDescription('Reason').setRequired(false)),
+async function deployCommands() {
+  try {
+    console.log("Started refreshing application commands...");
 
-  new SlashCommandBuilder()
-    .setName('admin-remove')
-    .setDescription('Admin: remove a specific amount of CTK from a user.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
-    .addIntegerOption(opt => opt.setName('amount').setDescription('Amount to remove').setMinValue(1).setRequired(true))
-    .addStringOption(opt => opt.setName('reason').setDescription('Reason').setRequired(false)),
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
 
-  new SlashCommandBuilder()
-    .setName('admin-set')
-    .setDescription('Admin: set a user CTK balance to an exact amount.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
-    .addIntegerOption(opt => opt.setName('amount').setDescription('New balance').setMinValue(0).setRequired(true))
-    .addStringOption(opt => opt.setName('reason').setDescription('Reason').setRequired(false)),
-
-  new SlashCommandBuilder()
-    .setName('admin-clear')
-    .setDescription('Admin: clear a user CTK balance to 0.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
-    .addStringOption(opt => opt.setName('reason').setDescription('Reason').setRequired(false)),
-
-  new SlashCommandBuilder()
-    .setName('admin-redemptions')
-    .setDescription('Admin: list pending manual redemption requests.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-].map(cmd => cmd.toJSON());
-
-async function main() {
-  const rest = new REST({ version: '10' }).setToken(config.discordToken);
-  console.log('Deploying guild slash commands...');
-  await rest.put(Routes.applicationGuildCommands(config.clientId, config.guildId), { body: commands });
-  console.log('Done.');
+    console.log("Successfully reloaded application commands.");
+  } catch (error) {
+    console.error("Error deploying commands:", error);
+    process.exit(1);
+  }
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
-  process.exit(1);
-});
+deployCommands();
