@@ -74,23 +74,27 @@ async function createLootLabsLink({ sessionId, destinationUrl }) {
     data
   });
 
-  if (!res.ok || !data || data.type === 'error' || !data.message?.loot_url) {
-    const msg =
-      typeof data?.message === 'string'
-        ? data.message
-        : data?.raw || JSON.stringify(data?.message || data || {});
+const createdLink = Array.isArray(data.message)
+  ? data.message[0]
+  : data.message;
 
-    throw new Error(`LootLabs link creation failed: ${msg || `HTTP ${res.status}`}`);
-  }
+if (!res.ok || !data || data.type === 'error' || !createdLink?.loot_url) {
+  const msg =
+    typeof data?.message === 'string'
+      ? data.message
+      : data?.raw || JSON.stringify(data?.message || data || {});
 
-  const rawLootUrl = data.message.loot_url;
+  throw new Error(`LootLabs link creation failed: ${msg || `HTTP ${res.status}`}`);
+}
 
-  return {
-    shortCode: data.message.short || null,
-    rawLootUrl,
-    lootUrl: appendPuid(rawLootUrl, sessionId),
-    apiResponse: data
-  };
+const rawLootUrl = createdLink.loot_url;
+
+return {
+  shortCode: createdLink.short || null,
+  rawLootUrl,
+  lootUrl: appendPuid(rawLootUrl, sessionId),
+  apiResponse: data
+};
 }
 
 module.exports = {
