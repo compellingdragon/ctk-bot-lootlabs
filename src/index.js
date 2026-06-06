@@ -67,12 +67,15 @@ async function makeEarnSession(discordId, username, method) {
   if (cd.active) {
     return {
       ok: false,
-      message: `You already claimed CTK recently. Try again later.`
+      message: `You already claimed CTK recently.\nTry again later.`
     };
   }
 
-  const active = db.getActiveSession(discordId, method);
-  const session = active || db.createEarnSession(discordId, method);
+  // Expire any old unfinished session before creating a new one.
+  // This prevents LootLabs and Linkvertise sessions from overlapping.
+  db.expireActiveSessionsForUser(discordId);
+
+  const session = db.createEarnSession(discordId, method);
 
   return {
     ok: true,
