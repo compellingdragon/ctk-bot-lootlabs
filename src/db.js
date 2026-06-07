@@ -1,10 +1,27 @@
-const Database = require('better-sqlite3');
+const Database = require('libsql');
 const crypto = require('crypto');
 const config = require('./config');
 
-const db = new Database(config.dbPath);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+const db = config.tursoDatabaseUrl
+  ? new Database(config.tursoDatabaseUrl, {
+      authToken: config.tursoAuthToken
+    })
+  : new Database(config.dbPath);
+
+// WAL is only for local SQLite files, not remote Turso.
+if (!config.tursoDatabaseUrl) {
+  try {
+    db.exec('PRAGMA journal_mode = WAL');
+  } catch (err) {
+    console.warn('Could not enable WAL:', err.message);
+  }
+}
+
+try {
+  db.exec('PRAGMA foreign_keys = ON');
+} catch (err) {
+  console.warn('Could not enable foreign keys:', err.message);
+}
 
 function now() {
   return Date.now();
