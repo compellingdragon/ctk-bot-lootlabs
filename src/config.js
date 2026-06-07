@@ -43,7 +43,7 @@ const config = {
 
   cooldownHours: Number(process.env.EARN_COOLDOWN_HOURS || 0),
   sessionExpiryMinutes: Number(process.env.SESSION_EXPIRY_MINUTES || 30),
-  dbPath: process.env.DB_PATH || './ctk.sqlite'
+  dbPath: process.env.DB_PATH || './ctk.sqlite',
   tursoDatabaseUrl: optional('TURSO_DATABASE_URL'),
   tursoAuthToken: optional('TURSO_AUTH_TOKEN'),
 };
