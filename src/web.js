@@ -172,6 +172,14 @@ function startWebServer(client) {
   app.get('/', (req, res) => {
     res.render('index', { publicBaseUrl: config.publicBaseUrl });
   });
+  
+  app.get('/health', (req, res) => {
+  return res.status(200).json({
+    ok: true,
+    bot: client?.user?.tag || 'starting',
+    time: new Date().toISOString()
+  });
+});
 
   app.get('/start/:sessionId', async (req, res) => {
     try {
