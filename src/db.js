@@ -167,16 +167,6 @@ function updateSessionLootStarted(sessionId, token, lootlabsUrl, lootlabsShort =
   `).run(token, lootlabsUrl, lootlabsShort, ipHint, sessionId);
 }
 
-function expireActiveSessionsForUser(discordId) {
-  db.prepare(`
-    UPDATE earn_sessions
-    SET status = 'expired'
-    WHERE discord_id = ?
-      AND status IN ('pending', 'loot_started', 'linkvertise_started')
-      AND expires_at > ?
-  `).run(discordId, now());
-}
-
 function updateSessionLinkvertiseStarted(sessionId, token, linkvertiseUrl, ipHint = null) {
   db.prepare(`
     UPDATE earn_sessions
@@ -399,7 +389,6 @@ module.exports = {
   getUser,
   getOrCreateUser,
   createEarnSession,
-  expireActiveSessionsForUser,
   getSession,
   expireActiveSessionsForUser,
   getActiveSession,
