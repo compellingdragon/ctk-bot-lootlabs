@@ -9,6 +9,26 @@ const {
 const config = require('./config');
 const db = require('./db');
 const { startWebServer } = require('./web');
+const express = require("express");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+  res.status(200).send("CTK bot is alive ✅");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    bot: "online",
+    time: new Date().toISOString()
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Keep-alive server running on port ${PORT}`);
+});
 
 function fmt(n) {
   return `${Number(n).toLocaleString()} CTK`;
