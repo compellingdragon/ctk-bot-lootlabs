@@ -186,9 +186,15 @@ function startWebServer(client) {
       const session = db.getSession(req.params.sessionId);
       if (!checkSessionValid(res, session)) return;
 
-      if (req.session.discordUser) {
-        return continueAfterDiscordVerified(req, res, client, session, req.session.discordUser);
-      }
+if (req.session.discordUser) {
+  if (req.session.discordUser.id === session.discord_id) {
+    return continueAfterDiscordVerified(req, res, client, session, req.session.discordUser);
+  }
+
+  // Saved browser login is for a different Discord account.
+  // Clear it and force a fresh Discord OAuth login.
+  delete req.session.discordUser;
+}
 
       const state = signOAuthState(session.session_id);
       const oauth = new URL('https://discord.com/api/oauth2/authorize');
@@ -198,6 +204,7 @@ function startWebServer(client) {
       oauth.searchParams.set('response_type', 'code');
       oauth.searchParams.set('scope', 'identify');
       oauth.searchParams.set('state', state);
+      oauth.searchParams.set('prompt', 'consent');
 
       return res.redirect(oauth.toString());
     } catch (err) {
