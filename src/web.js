@@ -65,13 +65,13 @@ function checkSessionValid(res, session) {
     return false;
   }
 
-  if (session.status === 'completed') {
-    res.render('message', {
-      title: 'Already claimed',
-      message: 'This session has already been claimed.'
-    });
-    return false;
-  }
+if (session.status === 'completed') {
+  return res.render('message', {
+    title: 'CTK already added!',
+    message: `Your reward has already been added to your Discord account.
+Check it with /balance or !balance.`
+  });
+}
 
   if (session.expires_at < db.now()) {
     db.markSessionExpired(session.session_id);
