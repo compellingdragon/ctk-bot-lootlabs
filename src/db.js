@@ -381,6 +381,16 @@ function topUsers(limit = 10) {
   `).all(limit);
 }
 
+function expireActiveSessionsForUser(discordId) {
+  db.prepare(`
+    UPDATE earn_sessions
+    SET status = 'expired'
+    WHERE discord_id = ?
+      AND status IN ('pending', 'loot_started', 'linkvertise_started')
+      AND expires_at > ?
+  `).run(discordId, now());
+}
+
 module.exports = {
   initDb,
   now,
@@ -389,6 +399,7 @@ module.exports = {
   getUser,
   getOrCreateUser,
   createEarnSession,
+  expireActiveSessionsForUser,
   getSession,
   expireActiveSessionsForUser,
   getActiveSession,
