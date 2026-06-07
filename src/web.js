@@ -269,12 +269,13 @@ if (req.session.discordUser) {
       });
     }
 
-    if (session.status === 'completed') {
-      return res.render('message', {
-        title: 'Already claimed',
-        message: `This session was already claimed. Check your balance in Discord.`
-      });
-    }
+if (session.status === 'completed') {
+  return res.render('message', {
+    title: 'CTK added!',
+    message: `Success! Your reward has already been added to your Discord account.
+Check it with /balance or !balance.`
+  });
+}
 
     if (session.expires_at < db.now()) {
       db.markSessionExpired(session.session_id);
